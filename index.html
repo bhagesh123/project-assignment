@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <span class="navbar-brand" href="#">MindDorks</span>
+    <div class="nav-item text-light border border-success p-2 pl-3 pr-3 rounded">Git Star App</div>
+  </nav>
+  <div class="container-sm bg-light pt-4 pb-4 mt-5" style="min-height:30vw">
+    <form class="form-inline d-flex flex-sm-row flex-column mb-2" id="form_search" novalidate>
+      <input type="text" class="form-control form-control-lg flex-grow-1 align-self-stretch mb-3 mb-sm-0 mr-sm-3"
+        placeholder='Eg="https://github.com/PaulMcInnis/JobFunnel"' id="input_link" required>
+      <button type="submit" class="btn btn-lg btn-primary align-self-stretch">Search</button>
+    </form>
+    <div class="alert alert-danger invisible text-center" id="error_dialog" role="alert">
+
+    </div>
+    <table class="table">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col">Author</th>
+          <th scope="col">Repository</th>
+          <th scope="col">Github Stars</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="info_row">
+          <td id="author"> </td>
+          <td id="repo"> </td>
+          <th id="stars"> </th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</body>
+<script>
+  window.onload = function () {
+    let form_search_el = document.getElementById('form_search')
+    let input_link_el = document.getElementById('input_link')
+    let info_row = document.getElementById('info_row')
+    let author_el = document.getElementById('author')
+    let repo_el = document.getElementById('repo')
+    let stars_el = document.getElementById('stars')
+
+    let error_dialog_el = document.getElementById('error_dialog')
+
+    form_search_el.addEventListener('submit', (e) => {
+      e.preventDefault();
+      let input_val = input_link_el.value
+      form_search_el.classList.add('was-validated')
+
+      let queryURL = encodeURI(input_val)
+      let request_url = `http://localhost:5000/get_github_star?git_link=${queryURL}`
+
+      if (form_search_el.checkValidity()) {
+        fetch(request_url)
+          .then((res) => res.text())
+          .then((data) => {
+            let response_obj = JSON.parse(data)
+            console.log(response_obj)
+
+            if (response_obj.error) {
+              error_dialog_el.innerText = response_obj.error;
+              error_dialog_el.classList.remove('invisible');
+              info_row.classList.add('invisible')
+            }
+            else {
+              error_dialog_el.classList.add('invisible');
+              info_row.classList.remove('invisible')
+              author_el.innerText = response_obj.repository[0]
+              repo_el.innerText = response_obj.repository[1]
+              stars_el.innerText = response_obj.star
+            }
+          })
+      }
+    })
+  }
+</script>
+
+</html>
